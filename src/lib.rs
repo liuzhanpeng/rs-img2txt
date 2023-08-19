@@ -44,7 +44,7 @@ impl TextualImage {
         let (ori_width, ori_height) = self.img.dimensions();
         let target_height = self.get_target_height(ori_width, ori_height, width);
         self.img = self.img
-            .resize(ori_width, target_height, FilterType::CatmullRom);
+            .resize(width, target_height, FilterType::CatmullRom);
     }
 
     fn get_target_height(&self, ori_width: u32, ori_height: u32, target_width: u32) -> u32 {

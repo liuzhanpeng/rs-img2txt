@@ -1,6 +1,6 @@
-use std::{vec, fmt::Display};
+use std::{fmt::Display, vec};
 
-use image::{DynamicImage, ImageResult, GenericImageView, Pixel, imageops::FilterType};
+use image::{imageops::FilterType, DynamicImage, GenericImageView, ImageResult, Pixel};
 
 pub struct TextualImage {
     img: DynamicImage,
@@ -19,7 +19,7 @@ impl Display for Result {
         }
 
         write!(f, "{}", tmp)
-    } 
+    }
 }
 
 impl TextualImage {
@@ -28,7 +28,11 @@ impl TextualImage {
 
         Ok(TextualImage {
             img: img,
-            chars: if let Some(v) = chars { v } else { vec!['W', '@', '#', '8', '&', '*', 'o', ':', '.', ' '] },
+            chars: if let Some(v) = chars {
+                v
+            } else {
+                vec!['W', '@', '#', '8', '&', '*', 'o', ':', '.', ' ']
+            },
         })
     }
 
@@ -36,8 +40,20 @@ impl TextualImage {
         self.chars = chars;
     }
 
-    pub fn resize(&self, width: u32, height: u32) {
-        self.img.resize(width, height, FilterType::CatmullRom);
+    pub fn resize(&mut self, width: u32) {
+        let (ori_width, ori_height) = self.img.dimensions();
+        let target_height = self.get_target_height(ori_width, ori_height, width);
+        self.img = self.img
+            .resize(ori_width, target_height, FilterType::CatmullRom);
+    }
+
+    fn get_target_height(&self, ori_width: u32, ori_height: u32, target_width: u32) -> u32 {
+        let mut target_height = ori_height;
+        if target_width < ori_width {
+            target_height =
+                (target_height as f64 / (ori_width as f64 / target_width as f64)).round() as u32;
+        }
+        target_height
     }
 
     pub fn display(&self) -> Result {
@@ -57,8 +73,7 @@ impl TextualImage {
     }
 
     fn calculate_index(&self, r: u8, g: u8, b: u8) -> usize {
-        let scale =  0.2126 * r as f64 + 0.7152 * g as f64 + 0.0722 * b as f64;
+        let scale = 0.2126 * r as f64 + 0.7152 * g as f64 + 0.0722 * b as f64;
         (scale / ((255 / self.chars.len()) as f64 + 0.5)).floor() as usize
     }
-
 }

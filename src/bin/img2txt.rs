@@ -10,7 +10,8 @@ struct Args {
 fn main() {
     let args = Args::parse();
 
-    let textual_img = rs_img2txt::TextualImage::new(&args.filename, None).unwrap();
+    let mut textual_img = rs_img2txt::TextualImage::new(&args.filename, None).unwrap();
+    textual_img.resize(120);
 
     print!("{}", textual_img.display());
 }
